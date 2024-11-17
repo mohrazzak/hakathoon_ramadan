@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:17.0-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - boilerplate-db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: api
+
+volumes:
+  boilerplate-db:
