@@ -1,10 +1,11 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto';
 import { RTGuard } from 'src/core/guards';
 import { GetUser } from 'src/core/decorators/get-user.decorator';
 import { GetUserId } from 'src/core/decorators/get-user-id.decorator';
 import { Public } from 'src/core/decorators/public.decorator';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -12,8 +13,21 @@ export class AuthController {
 
   @Public()
   @Post('/login')
-  async login(@Body() dto: LoginDto) {
-    return await this.authService.login(dto);
+  async login(
+    @Res({ passthrough: true }) response: Response,
+    @Body() dto: LoginDto,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.login(dto);
+
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: false,
+      sameSite: 'none',
+      path: '/auth/refresh',
+      priority: 'high',
+    });
+    return { accessToken };
   }
 
   @Post('/logout')
@@ -28,6 +42,8 @@ export class AuthController {
     @GetUserId() userId: number,
     @GetUser('username') username: string,
   ) {
-    return await this.authService.refresh(userId, username);
+    const accessToken = await this.authService.refresh(userId, username);
+
+    return { accessToken };
   }
 }

@@ -24,7 +24,7 @@ export class AuthService {
       await this.signRT(userId, username),
     ]);
 
-    return { ACCESS_TOKEN: at, REFRESH_TOKEN: rt };
+    return { accessToken: at, refreshToken: rt };
   }
 
   async signAT(userId: number, username: string) {
@@ -82,7 +82,7 @@ export class AuthService {
     const tokens = await this.getTokens(existingUser.id, dto.username);
     // delay it
 
-    await this.updateRTHash(existingUser.id, tokens.REFRESH_TOKEN);
+    await this.updateRTHash(existingUser.id, tokens.refreshToken);
 
     return tokens;
   }
@@ -92,6 +92,6 @@ export class AuthService {
   }
 
   async refresh(userId: number, username: string): Promise<string> {
-    return await this.signRT(userId, username);
+    return await this.signAT(userId, username);
   }
 }
