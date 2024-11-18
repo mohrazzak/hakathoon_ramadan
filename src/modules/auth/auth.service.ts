@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Tokens } from './interface';
 import { LoginDto } from './dto';
@@ -73,9 +68,9 @@ export class AuthService {
     );
 
     if (!existingUser)
-      throw new UnauthorizedException('اسم المستخدم او كلمة المرور خاطئة.');
+      throw new BadRequestException('اسم المستخدم او كلمة المرور خاطئة.');
     if (existingUser.status === USER_STATUS.NOT_ACTIVE)
-      throw new UnauthorizedException('الحساب معطل, راجع المدير التقني.');
+      throw new BadRequestException('الحساب معطل, راجع المدير التقني.');
 
     const passwordMatches = await this.hashService.verify(
       existingUser.password,
@@ -83,7 +78,7 @@ export class AuthService {
     );
 
     if (!passwordMatches)
-      throw new UnauthorizedException('اسم المستخدم او كلمة المرور خاطئة.');
+      throw new BadRequestException('اسم المستخدم او كلمة المرور خاطئة.');
     const tokens = await this.getTokens(existingUser.id, dto.username);
     // delay it
 
@@ -96,10 +91,7 @@ export class AuthService {
     await this.usersService.clearRefreshToken(userId);
   }
 
-  async refresh(userId: number, email: string): Promise<Tokens> {
-    const tokens = await this.getTokens(userId, email);
-    await this.updateRTHash(userId, tokens.REFRESH_TOKEN);
-
-    return tokens;
+  async refresh(userId: number, username: string): Promise<string> {
+    return await this.signRT(userId, username);
   }
 }
