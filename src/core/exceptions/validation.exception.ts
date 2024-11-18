@@ -3,6 +3,6 @@ import { ZodError } from 'zod';
 
 export class ValidationException extends UnprocessableEntityException {
   constructor(error: ZodError) {
-    super('خطأ في الحقول المدخلة.', { cause: error.errors });
+    super(error.errors[0].message, { cause: error.errors });
   }
 }

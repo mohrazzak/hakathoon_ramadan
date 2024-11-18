@@ -20,6 +20,11 @@ export class UsersController {
     await this.usersService.registerUser(body);
   }
 
+  @Get('/me')
+  async findMe() {
+    return { firstName: 'Mohammad' };
+  }
+
   @Get()
   async findAll() {
     return await this.usersService.findAll();
