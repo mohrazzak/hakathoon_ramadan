@@ -26,26 +26,54 @@ export class RTStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   }
 
   async validate(req: Request, payload: JwtPayload): Promise<JwtRTPayload> {
-    const rt = req.cookies['refreshToken'];
+    // Extract the Authorization header
+    const authHeader =
+      req.headers['authorization'] || req.headers['Authorization'];
 
-    if (!rt)
+    if (!authHeader) {
       throw new UnauthorizedException(
         'لايمكن تجديد الجلسة, سجل الدخول مرة اخرى',
       );
+    }
 
+    // Extract the bearer token from the header
+    const bearerToken = Array.isArray(authHeader)
+      ? authHeader[authHeader.length - 1]
+      : authHeader;
+
+    if (!bearerToken.startsWith('Bearer ')) {
+      throw new UnauthorizedException(
+        'لايمكن تجديد الجلسة, سجل الدخول مرة اخرى',
+      );
+    }
+
+    const token = bearerToken.slice(7); // Remove 'Bearer ' prefix
+
+    if (!token) {
+      throw new UnauthorizedException(
+        'لايمكن تجديد الجلسة, سجل الدخول مرة اخرى',
+      );
+    }
+
+    // Find the user associated with the payload
     const user = await this.usersService.findByIdAuth(payload.sub);
 
-    if (!user || !user.hashedRt || user.status === USER_STATUS.NOT_ACTIVE)
+    if (!user || !user.hashedRt || user.status === USER_STATUS.NOT_ACTIVE) {
       throw new UnauthorizedException(
         'لايمكن تجديد الجلسة, سجل الدخول مرة اخرى',
       );
+    }
 
-    const rtMatches = await this.hashService.verify(user.hashedRt, rt);
-    if (!rtMatches)
+    // Verify the token against the stored hash
+    const rtMatches = await this.hashService.verify(user.hashedRt, token);
+
+    if (!rtMatches) {
       throw new UnauthorizedException(
         'لايمكن تجديد الجلسة, سجل الدخول مرة اخرى',
       );
+    }
 
-    return { ...payload, rt };
+    // Return the validated payload with the token
+    return { ...payload, rt: token };
   }
 }

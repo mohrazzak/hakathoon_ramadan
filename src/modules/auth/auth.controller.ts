@@ -23,8 +23,8 @@ export class AuthController {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       secure: false,
-      sameSite: 'none',
-      path: '/auth/refresh',
+      sameSite: 'lax',
+      path: '/',
       priority: 'high',
     });
     return { accessToken };
