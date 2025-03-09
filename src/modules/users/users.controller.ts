@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
+import { Public } from 'src/core';
 
 @Controller('users')
 export class UsersController {
@@ -24,7 +25,6 @@ export class UsersController {
   async findMe() {
     return { firstName: 'Mohammad' };
   }
-
   @Get()
   async findAll() {
     return await this.usersService.findAll();

@@ -47,7 +47,3 @@ enum USER_STATUS {
   ACTIVE
   NOT_ACTIVE
 }
-
-model Asset {
-  id Int @id @default(autoincrement())
-}

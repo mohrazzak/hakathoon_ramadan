@@ -32,6 +32,7 @@ import { dbConfig } from './core';
               database: configuration.name,
               user: configuration.username,
               password: configuration.password,
+              ssl: true,
             }),
           }),
         };
