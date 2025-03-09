@@ -14,6 +14,7 @@ import { authConfig } from './config/auth.config';
     JwtModule,
     UsersModule,
     HashModule,
+    UsersModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, ATStrategy, RTStrategy],

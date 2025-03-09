@@ -10,6 +10,7 @@ const dialect = new PostgresDialect({
     password: process.env.DATABASE_PASSWORD!,
     database: process.env.DATABASE_NAME!,
     port: +process.env.DATABASE_PORT!,
+    ssl: true
   }),
 });
 
@@ -33,19 +34,19 @@ async function main() {
       .insertInto('User')
       .values([
         {
-          firstName: 'فادي',
-          lastName: 'ابو دان',
-          username: 'admin',
-          password: await argon2.hash('Hmode1422', {
+          firstName: 'Hussein',
+          lastName: 'Haj Ghazal',
+          username: 'hussein',
+          password: await argon2.hash('Hakathoon12@', {
             secret: Buffer.from(hashSecret),
           }),
           roleId: roles[0].id,
         },
         {
-          firstName: 'محمد',
-          lastName: 'عبد الرزاق',
-          username: 'user',
-          password: await argon2.hash('Hmode1422', {
+          firstName: 'Mohammad',
+          lastName: 'Abdalrazzak',
+          username: 'mohammad',
+          password: await argon2.hash('Hakathoon12@', {
             secret: Buffer.from(hashSecret),
           }),
           roleId: roles[1].id,

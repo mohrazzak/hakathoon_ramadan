@@ -3,12 +3,13 @@ import { Kysely } from 'kysely';
 import { DB } from 'src/db/types';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { InjectKysely } from 'nestjs-kysely';
+import { SignupDto } from '../auth/dto';
 
 @Injectable()
 export class UsersRepository {
   constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
 
-  async create(user: CreateUserDto) {
+  async create(user: SignupDto) {
     await this.db
       .insertInto('User')
       .values({
@@ -16,8 +17,7 @@ export class UsersRepository {
         lastName: user.lastName,
         username: user.username,
         password: user.password,
-        roleId: user.roleId,
-        status: user.status,
+        roleId: 2,
       })
       .executeTakeFirst();
   }

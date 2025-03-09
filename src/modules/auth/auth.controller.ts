@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto';
+import { LoginDto, SignupDto } from './dto';
 import { RTGuard } from 'src/core/guards';
 import { GetUser } from 'src/core/decorators/get-user.decorator';
 import { GetUserId } from 'src/core/decorators/get-user-id.decorator';
@@ -10,6 +10,12 @@ import { Response } from 'express';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Public()
+  @Post('/signup')
+  async signup(@Body() body: SignupDto) {
+    await this.authService.signup(body);
+  }
 
   @Public()
   @Post('/login')

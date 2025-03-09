@@ -6,9 +6,6 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 import type { USER_STATUS } from "./enums";
 
-export type Asset = {
-    id: Generated<number>;
-};
 export type Role = {
     id: Generated<number>;
     name: string;
@@ -27,7 +24,6 @@ export type User = {
     deletedAt: Timestamp | null;
 };
 export type DB = {
-    Asset: Asset;
     Role: Role;
     User: User;
 };

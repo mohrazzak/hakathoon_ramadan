@@ -1,12 +1,13 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Tokens } from './interface';
-import { LoginDto } from './dto';
+import { LoginDto, SignupDto } from './dto';
 import { HashService } from '../hash/hash.service';
 import { USER_STATUS } from 'src/db/enums';
 import { UsersService } from '../users/users.service';
 import { ConfigType } from '@nestjs/config';
 import { authConfig } from './config/auth.config';
+import { UsersRepository } from '../users/users.repository';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
     private readonly hashService: HashService,
     @Inject(authConfig.KEY)
     private authEnv: ConfigType<typeof authConfig>,
+    private readonly usersRepository: UsersRepository
   ) {}
 
   async getTokens(userId: number, username: string): Promise<Tokens> {
@@ -85,6 +87,14 @@ export class AuthService {
     await this.updateRTHash(existingUser.id, tokens.refreshToken);
 
     return tokens;
+  }
+
+
+  async signup(dto: SignupDto) {
+    const { password, ...body } = dto;
+    const hash = await this.hashService.hash(password);
+
+    await this.usersRepository.create({ ...body, password: hash });
   }
 
   async logout(userId: number) {
