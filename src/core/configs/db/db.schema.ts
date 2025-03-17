@@ -1,11 +1,8 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
-export const envDBSchema = z.strictObject({
-  host: z.string(),
+export const envAppSchema = z.strictObject({
   port: z.string(),
-  username: z.string(),
-  password: z.string(),
-  name: z.string(),
-});
+  apiKey: z.string(),
+})
 
-export type EnvDBSchema = z.infer<typeof envDBSchema>;
+export type EnvAppSchema = z.infer<typeof envAppSchema>

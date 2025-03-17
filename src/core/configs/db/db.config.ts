@@ -1,16 +1,14 @@
-import { registerAs } from '@nestjs/config';
-import { EnvDBSchema, envDBSchema } from './db.schema';
+import { registerAs } from '@nestjs/config'
+import { envAppSchema, EnvAppSchema } from './db.schema'
 
-export const dbConfig = registerAs('database', () => {
-  const dbConfig: EnvDBSchema = {
-    host: process.env.DATABASE_HOST!,
-    username: process.env.DATABASE_USERNAME!,
-    password: process.env.DATABASE_PASSWORD!,
-    name: process.env.DATABASE_NAME!,
-    port: process.env.DATABASE_PORT!,
-  };
+export const appConfig = registerAs('app', () => {
+  const dbConfig: EnvAppSchema = {
+    apiKey: process.env.API_KEY!,
+    port: process.env.PORT!,
+  }
+  console.log(dbConfig)
 
-  const parsed = envDBSchema.parse(dbConfig);
+  const parsed = envAppSchema.parse(dbConfig)
 
-  return parsed;
-});
+  return parsed
+})
