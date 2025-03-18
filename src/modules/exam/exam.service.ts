@@ -6,6 +6,7 @@ import {
   QuestionGroup,
   QuestionGroupType,
 } from './entity/question-group.entity'
+import { pdfToText } from 'pdf-ts'
 
 @Injectable()
 export class ExamService {
@@ -95,8 +96,14 @@ export class ExamService {
   }
 
   async generateExam(examDto: ExamDto, pdfs: Express.Multer.File[]) {
+    const promises = pdfs.map((pdf) => pdfToText(pdf.buffer))
+
+    const promisesResult = await Promise.all(promises)
+    console.log(promisesResult)
+    const totalText = promisesResult.join()
+
     const questionGroups = examDto.questionGroups.map((qg) =>
-      this.generateQuestionGroup(qg, examDto.text),
+      this.generateQuestionGroup(qg, totalText),
     )
     const result = (await Promise.all(questionGroups)).map((e) => {
       try {

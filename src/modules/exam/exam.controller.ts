@@ -8,7 +8,6 @@ import {
 import { ExamDto } from './dto/generate.dto'
 import { ExamService } from './exam.service'
 import { FilesInterceptor } from '@nestjs/platform-express'
-import { pdfToText } from 'pdf-ts'
 @Controller('exam')
 export class ExamController {
   constructor(private readonly examService: ExamService) {}
@@ -19,9 +18,6 @@ export class ExamController {
     @Body() examDto: ExamDto,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
-    const text = await pdfToText(files[0].buffer, {})
-    console.log(text)
-    return files
-    // return this.examService.generateExam(examDto, files)
+    return this.examService.generateExam(examDto, files)
   }
 }
