@@ -14,42 +14,41 @@ export class ExamService {
 
   async generateQuestionGroup(questionGroup: QuestionGroup, text: string) {
     const multipleChoiceInput = `
-      TEXT : ${text}
-      give me ${questionGroup.count} multiple choice question with the ${questionGroup.choicesCount} choices for each question
-      1. The questions focus on the core concepts and main ideas of the text.
-      2. The choices for each question are closely related and plausible, making the exam difficult and thought-provoking.
-      3. The questions are structured in a way that resembles a real exam, with clear and concise wording.
-      4. choices must not include ordering or numbering just put the choice 
-      Example : "1. first choice" this choice format is wrong because it contains "1."
-      the correct choice format is "first choice"
-  
-      and give the questions and answers in the following JSON structure
-      don't give me anything other than the JSON i asked for not a single dot more
-      JSON STRUCTURE : { question : "question text here", choices: ["choices here"], answer : "answer", type: ${QuestionGroupType.MULTIPLE_CHOICES}}
-    `
+    TEXT : ${text}
+    Generate From the Previous ${questionGroup.count} multiple-choice questions with ${questionGroup.choicesCount} choices for each question:
+    1. Focus on the core concepts and main ideas of the text.
+    2. Ensure the choices for each question are closely related and plausible, making the exam challenging and thought-provoking.
+    3. Structure the questions to resemble a real exam, with clear and concise wording.
+    4. Do not include ordering or numbering in the choices. For example, this format is incorrect: "1. first choice". The correct format is: "first choice".
+    
+    Provide the questions and answers in the following JSON structure as an array:
+    [{ "question": "question text here", "choices": ["choices here"], "answer": "answer" }]
+    Do not include anything other than the specified JSON structure.
+  `
 
     const trueFalseInput = `
-      TEXT : ${text}
-      give me ${questionGroup.count} true or false question 
-      1. The questions focus on the core concepts and main ideas of the text.
-      2. The questions are structured in a way that resembles a real exam, with clear and concise wording.  
-      3. give only the statement itself without saying "true or false" or anything like it only the statement itself
-      and give the questions and answers in the following JSON structure
-      don't give me anything other than the JSON i asked for not a single dot more
-      JSON STRUCTURE : { question : "question text here", answer : "answer either true or false", type: ${QuestionGroupType.TRUE_FALSE}}
-
-      `
+    TEXT : ${text}
+    Generate From the Previous ${questionGroup.count} true/false questions:
+    1. Focus on the core concepts and main ideas of the text.
+    2. Structure the questions to resemble a real exam, with clear and concise wording.
+    3. Provide only the statement itself without adding "true or false" or any similar phrase. Only include the statement.
+  
+    Provide the questions and answers in the following JSON structure as an array:
+    [{ "question": "question text here", "answer": "answer either true or false" }]
+    Do not include anything other than the specified JSON structure.
+  `
 
     const classicalQuestion = `
-        TEXT : ${text}
-        give me ${questionGroup.count} normal question meaning the answer of this question is a text not choices or yes or no it is a written answer 
-        1. The questions focus on the core concepts and main ideas of the text.
-        2. The questions are structured in a way that resembles a real exam, with clear and concise wording.  
-        and give the questions and answers in the following JSON structure
-        don't give me anything other than the JSON i asked for not a single dot more
-        JSON STRUCTURE : { question : "question text here", answer : "answer", type: ${QuestionGroupType.CLASSICAL}}
-    
-        `
+    TEXT : ${text}
+    Generate From the Previous ${questionGroup.count} open-ended questions (requiring a written answer, not choices or yes/no):
+    1. Focus on the core concepts and main ideas of the text.
+    2. Structure the questions to resemble a real exam, with clear and concise wording.
+  
+    Provide the questions and answers in the following JSON structure as an array:
+    [{ "question": "question text here", "answer": "answer" }]
+    Do not include anything other than the specified JSON structure.
+  `
+
     const typeToInput = {
       [QuestionGroupType.MULTIPLE_CHOICES]: multipleChoiceInput,
       [QuestionGroupType.TRUE_FALSE]: trueFalseInput,
@@ -80,15 +79,18 @@ export class ExamService {
           modle: 'google/gemma-3-27b-it',
           inputs: input,
         })
-        console.log(response.generated_text)
+
         return response.generated_text
           .replaceAll('\n', '')
           .match(/(json|javascript).*?```/)?.[0]
           .replaceAll('`', '')
           .replaceAll('json', '')
           .replaceAll('javascript', '')
+          .replaceAll('        ', '')
+          .replaceAll('     ', '')
+          .trim()
       } catch (e: any) {
-        throw new Error(e)
+        console.log(e)
       }
     } else {
       throw new InternalServerErrorException()
@@ -99,23 +101,24 @@ export class ExamService {
     const promises = pdfs.map((pdf) => pdfToText(pdf.buffer))
 
     const promisesResult = await Promise.all(promises)
-    console.log(promisesResult)
     const totalText = promisesResult.join()
-
     const questionGroups = examDto.questionGroups.map((qg) =>
       this.generateQuestionGroup(qg, totalText),
     )
     const result = (await Promise.all(questionGroups)).map((e) => {
       try {
         if (typeof e == 'string') {
-          const parsedJson = (JSON.parse(e) as object) ?? {}
+          const parsedJson = JSON.parse(e) as object
           return parsedJson
         } else return {}
-      } catch (err) {
-        return {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          error: err,
-          question: e,
+      } catch (err: any) {
+        try {
+          if (err.message.includes('white')) {
+            const parsedJson = (JSON.parse(`[${e}]`) as object) ?? {}
+            return parsedJson
+          } else return { err: err?.message, message: e }
+        } catch (err: any) {
+          return { err: err?.message, message: e }
         }
       }
     })
