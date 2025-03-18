@@ -94,7 +94,7 @@ export class ExamService {
     }
   }
 
-  async generateExam(examDto: ExamDto) {
+  async generateExam(examDto: ExamDto, pdfs: Express.Multer.File[]) {
     const questionGroups = examDto.questionGroups.map((qg) =>
       this.generateQuestionGroup(qg, examDto.text),
     )
