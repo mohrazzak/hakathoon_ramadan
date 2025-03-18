@@ -24,7 +24,7 @@ export class ExamService {
   
       and give the questions and answers in the following JSON structure
       don't give me anything other than the JSON i asked for not a single dot more
-      JSON STRUCTURE : { question : "question text here", choices: ["choices here"], answer : "answer"}
+      JSON STRUCTURE : { question : "question text here", choices: ["choices here"], answer : "answer", type: ${QuestionGroupType.MULTIPLE_CHOICES}}
     `
 
     const trueFalseInput = `
@@ -35,7 +35,7 @@ export class ExamService {
       3. give only the statement itself without saying "true or false" or anything like it only the statement itself
       and give the questions and answers in the following JSON structure
       don't give me anything other than the JSON i asked for not a single dot more
-      JSON STRUCTURE : { question : "question text here", answer : "answer either true or false"}
+      JSON STRUCTURE : { question : "question text here", answer : "answer either true or false", type: ${QuestionGroupType.TRUE_FALSE}}
 
       `
 
@@ -46,7 +46,7 @@ export class ExamService {
         2. The questions are structured in a way that resembles a real exam, with clear and concise wording.  
         and give the questions and answers in the following JSON structure
         don't give me anything other than the JSON i asked for not a single dot more
-        JSON STRUCTURE : { question : "question text here", answer : "answer"}
+        JSON STRUCTURE : { question : "question text here", answer : "answer", type: ${QuestionGroupType.CLASSICAL}}
     
         `
     const typeToInput = {
