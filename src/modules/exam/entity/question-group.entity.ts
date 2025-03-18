@@ -21,7 +21,7 @@ export const questionGroupSchema = z
         code: z.ZodIssueCode.custom,
         message:
           'عدد الاختيارات مطلوب عندما يكون نوع الاسئلة اخر الإجابة الصحيحة.',
-        path: ['choicesNumber'],
+        path: ['choicesCount'],
       })
     }
 
@@ -33,7 +33,7 @@ export const questionGroupSchema = z
         code: z.ZodIssueCode.custom,
         message:
           'عدد الاختيارات مطلوب فقط عندما يكون نوع الاسئلة اختر الإجابة الصحيحة.',
-        path: ['choicesNumber'],
+        path: ['choicesCount'],
       })
     }
   })
