@@ -25,7 +25,7 @@ export class ExamService {
   
       and give the questions and answers in the following JSON structure
       don't give me anything other than the JSON i asked for not a single dot more
-      JSON STRUCTURE : { question : "question text here", choices: ["choices here"], answer : "answer", type: ${QuestionGroupType.MULTIPLE_CHOICES}}
+      JSON STRUCTURE : [{question : "question text here", choices: ["choices here"], answer : "answer", type: ${QuestionGroupType.MULTIPLE_CHOICES}}]
     `
 
     const trueFalseInput = `
@@ -36,7 +36,7 @@ export class ExamService {
       3. give only the statement itself without saying "true or false" or anything like it only the statement itself
       and give the questions and answers in the following JSON structure
       don't give me anything other than the JSON i asked for not a single dot more
-      JSON STRUCTURE : { question : "question text here", answer : "answer either true or false", type: ${QuestionGroupType.TRUE_FALSE}}
+      JSON STRUCTURE : [{question : "question text here", answer : "answer either true or false", type: ${QuestionGroupType.TRUE_FALSE}}]
 
       `
 
@@ -47,7 +47,7 @@ export class ExamService {
         2. The questions are structured in a way that resembles a real exam, with clear and concise wording.  
         and give the questions and answers in the following JSON structure
         don't give me anything other than the JSON i asked for not a single dot more
-        JSON STRUCTURE : { question : "question text here", answer : "answer", type: ${QuestionGroupType.CLASSICAL}}
+        JSON STRUCTURE : [{question : "question text here", answer : "answer", type: ${QuestionGroupType.CLASSICAL}}]
     
         `
     const typeToInput = {
@@ -80,7 +80,23 @@ export class ExamService {
           modle: 'google/gemma-3-27b-it',
           inputs: input,
         })
-        console.log(response.generated_text)
+        const jsonRegex = /\{[^{}]*\}|\[[^\[\]]*\]/
+        const match = input.match(jsonRegex)
+
+        if (match) {
+          const jsonString = match[0]
+          try {
+            const jsonData = JSON.parse(jsonString)
+            console.log('Extracted JSON:', jsonData)
+          } catch (error) {
+            console.error('Invalid JSON:', error)
+          }
+        } else {
+          console.error('No JSON found in the input.')
+        }
+
+        console.log(match)
+
         return response.generated_text
           .replaceAll('\n', '')
           .match(/(json|javascript).*?```/)?.[0]
@@ -98,9 +114,8 @@ export class ExamService {
   async generateExam(examDto: ExamDto, pdfs: Express.Multer.File[]) {
     const promises = pdfs.map((pdf) => pdfToText(pdf.buffer))
 
-    const promisesResult = await Promise.all(promises)
-    console.log(promisesResult)
-    const totalText = promisesResult.join()
+    const [promisesResult] = await Promise.all(promises)
+    const totalText = promisesResult
 
     const questionGroups = examDto.questionGroups.map((qg) =>
       this.generateQuestionGroup(qg, totalText),
@@ -111,10 +126,11 @@ export class ExamService {
           const parsedJson = (JSON.parse(e) as object) ?? {}
           return parsedJson
         } else return {}
-      } catch (err) {
+      } catch (err: any) {
+        console.log(err)
         return {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          error: err,
+          error: err.message,
           question: e,
         }
       }
