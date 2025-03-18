@@ -9,8 +9,8 @@ export enum QuestionGroupType {
 export const questionGroupSchema = z
   .strictObject({
     type: z.nativeEnum(QuestionGroupType),
-    count: z.number().int().min(1).max(15),
-    choicesCount: z.number().int().min(1).max(4).optional(),
+    count: z.coerce.number().min(1).max(15),
+    choicesCount: z.coerce.number().int().min(1).max(4).optional(),
   })
   .superRefine((data, ctx) => {
     if (
