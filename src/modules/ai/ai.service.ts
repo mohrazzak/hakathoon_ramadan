@@ -1,15 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { HfInference } from '@huggingface/inference'
 import { ConfigType } from '@nestjs/config'
 import { appConfig } from 'src/core/configs/db'
+import { OpenAI } from 'openai'
 
 @Injectable()
 export class AIService {
+  readonly deepseek: OpenAI
+
   constructor(
     @Inject(appConfig.KEY)
     private authEnv: ConfigType<typeof appConfig>,
   ) {
-    this.hf = new HfInference(this.authEnv.apiKey)
+    this.deepseek = new OpenAI({
+      apiKey: this.authEnv.apiKey,
+      baseURL: 'https://openrouter.ai/api/v1',
+    })
   }
-  readonly hf: HfInference
 }

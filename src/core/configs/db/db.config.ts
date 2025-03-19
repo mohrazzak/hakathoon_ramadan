@@ -6,7 +6,6 @@ export const appConfig = registerAs('app', () => {
     apiKey: process.env.API_KEY!,
     port: process.env.PORT!,
   }
-  console.log(dbConfig)
 
   const parsed = envAppSchema.parse(dbConfig)
 
