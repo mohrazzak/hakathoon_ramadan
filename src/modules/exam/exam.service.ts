@@ -6,7 +6,6 @@ import {
   QuestionGroupType,
 } from './entity/question-group.entity'
 import { pdfToText } from 'pdf-ts'
-import ollama from 'ollama'
 @Injectable()
 export class ExamService {
   constructor(private readonly aiService: AIService) {}
@@ -25,7 +24,7 @@ export class ExamService {
      Respond using Following JSON :
      [{ "question": "question text here", "choices": ["array of choices"], "answer": "correct choice" }]
      Output only the JSON object. Do not include any descriptive text, prefixes, or additional words like 'JSON' in the response. Start directly with the JSON object and ensure strict schema compliance
-     the questions and answers should be in the ${lang} language
+    IMPORTANT NOTE: the questions and answers MUST be in the ${lang} language
      `
 
     const trueFalseInput = `
@@ -38,7 +37,7 @@ export class ExamService {
     Respond using Following JSON :
     [{ "question": "statement here", "answer": "true or false" }]
     Output only the JSON object. Do not include any descriptive text, prefixes, or additional words like 'JSON' in the response. Start directly with the JSON object and ensure strict schema compliance
-    the questions and answers should be the ${lang} language
+    IMPORTANT NOTE: the questions and answers MUST be in the ${lang} language
 
     `
 
@@ -49,7 +48,7 @@ export class ExamService {
     Respond using Following JSON :
     [{ "question": "question text here", "answer": "write the answer here" }]
     Output only the JSON object. Do not include any descriptive text, prefixes, or additional words like 'JSON' in the response. Start directly with the JSON object and ensure strict schema compliance
-    the questions and answers should be in the ${lang} language
+    IMPORTANT NOTE: the questions and answers MUST be in the ${lang} language
 
     `
 
@@ -215,8 +214,10 @@ export class ExamService {
         )
         return this.generateQuestionGroup(
           qg,
-          totalText.substring(startingIndex, startingIndex + 2000) ??
-            totalText.substring(0, 800),
+          // totalText.substring(startingIndex, startingIndex + 2000) ??
+          //   totalText.substring(0, 800),
+          totalText,
+          examDto.lang,
         )
       } catch (e: any) {
         console.log(e.message)
