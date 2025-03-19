@@ -60,7 +60,7 @@ export class ExamService {
 
     // Call the AI service to generate questions
     const response = await this.aiService.deepseek.chat.completions.create({
-      model: 'deepseek/deepseek-chat',
+      model: 'deepseek/deepseek-r1-zero:free',
       messages: [
         {
           role: 'user',
@@ -79,7 +79,10 @@ export class ExamService {
 
     // Clean up the response and return it
     return {
-      result: promptResult.replaceAll('\\boxed', '').replaceAll('\n', ''),
+      result: promptResult
+        .replaceAll('\\boxed', '')
+        .replaceAll('\n', '')
+        .replaceAll('```json', ''),
       type: questionGroup.type,
     }
   }
@@ -91,13 +94,24 @@ export class ExamService {
     const totalText = promisesResult.join()
 
     // Generate question groups based on the extracted text
-    const questionGroups = examDto.questionGroups.map((qg) =>
-      this.generateQuestionGroup(qg, totalText),
+    const questionGroups = examDto.questionGroups.map((qg, i) =>
+      this.generateQuestionGroup(qg, totalText.substring(i, i + 800)),
     )
-    const result = (await Promise.all(questionGroups)).map((e) => ({
-      questions: JSON.parse(e.result.substring(1, e.result.length - 1)),
-      type: e.type,
-    }))
+
+    const result = (await Promise.all(questionGroups)).map((e) => {
+      try {
+        return {
+          questions: JSON.parse(e.result.substring(1, e.result.length - 1)),
+          type: e.type,
+        }
+      } catch (e: any) {
+        return {
+          err: e,
+          questions: JSON.parse(e.result.substring(1, e.result.length - 1)),
+          type: e.type,
+        }
+      }
+    })
 
     return {
       [QuestionGroupType.CLASSICAL]: result
