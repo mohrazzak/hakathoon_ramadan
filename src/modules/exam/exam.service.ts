@@ -60,7 +60,7 @@ export class ExamService {
 
     // Call the AI service to generate questions
     const response = await this.aiService.deepseek.chat.completions.create({
-      model: 'deepseek/deepseek-r1-zero:free',
+      model: 'deepseek/deepseek-chat',
       messages: [
         {
           role: 'user',
