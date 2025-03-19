@@ -24,6 +24,7 @@ export class ExamService {
     5. Provide the questions and answers in the following JSON structure as an array:
        [{ "question": "question text here", "choices": ["choices here"], "answer": "correct choice" }]
     6. Do not include anything other than the specified JSON structure.
+    7. let the questions/answers be the same language as the text
     `
 
     const trueFalseInput = `
@@ -36,6 +37,7 @@ export class ExamService {
     4. Provide the questions and answers in the following JSON structure as an array:
     [{ "question": "statement here", "answer": "true or false" }]
     5. Do not include anything other than the specified JSON structure.
+    6. let the questions/answers be the same language as the text
     `
 
     const classicalQuestion = `
@@ -47,6 +49,7 @@ export class ExamService {
     3. Provide the questions and answers in the following JSON structure as an array:
        [{ "question": "question text here", "answer": "answer text here" }]
     4. Do not include anything other than the specified JSON structure.
+    5. let the questions/answers be the same language as the text
     `
 
     // Map question types to their respective prompts
@@ -105,6 +108,7 @@ export class ExamService {
           type: e.type,
         }
       } catch (e: any) {
+        console.log(e)
         return {
           err: e,
           questions: JSON.parse(e.result.substring(1, e.result.length - 1)),
