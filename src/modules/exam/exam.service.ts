@@ -70,7 +70,6 @@ export class ExamService {
     })
 
     const promptResult = response.choices[0].message.content
-    console.log(promptResult)
     // Validate the AI response
     if (!promptResult) {
       throw new BadRequestException(
@@ -79,8 +78,10 @@ export class ExamService {
     }
 
     // Clean up the response and return it
-    console.log(promptResult)
-    return promptResult.replaceAll('\\boxed', '').replaceAll('\n', '')
+    return {
+      result: promptResult.replaceAll('\\boxed', '').replaceAll('\n', ''),
+      type: questionGroup.type,
+    }
   }
 
   async generateExam(examDto: ExamDto, pdfs: Express.Multer.File[]) {
@@ -91,12 +92,23 @@ export class ExamService {
 
     // Generate question groups based on the extracted text
     const questionGroups = examDto.questionGroups.map((qg) =>
-      this.generateQuestionGroup(qg, totalText.substring(0, 400)),
+      this.generateQuestionGroup(qg, totalText),
     )
-    const result = (await Promise.all(questionGroups)).map((e) =>
-      JSON.parse(e.substring(1, e.length - 1)),
-    )
+    const result = (await Promise.all(questionGroups)).map((e) => ({
+      questions: JSON.parse(e.result.substring(1, e.result.length - 1)),
+      type: e.type,
+    }))
 
-    return result
+    return {
+      [QuestionGroupType.CLASSICAL]: result
+        .filter(({ type }) => type === QuestionGroupType.CLASSICAL)
+        .map(({ questions }) => questions),
+      [QuestionGroupType.MULTIPLE_CHOICES]: result
+        .filter(({ type }) => type === QuestionGroupType.MULTIPLE_CHOICES)
+        .map(({ questions }) => questions),
+      [QuestionGroupType.TRUE_FALSE]: result
+        .filter(({ type }) => type === QuestionGroupType.TRUE_FALSE)
+        .map(({ questions }) => questions),
+    }
   }
 }
