@@ -214,9 +214,8 @@ export class ExamService {
         )
         return this.generateQuestionGroup(
           qg,
-          // totalText.substring(startingIndex, startingIndex + 2000) ??
-          //   totalText.substring(0, 800),
-          totalText,
+          totalText.substring(startingIndex, startingIndex + 2000) ??
+            totalText.substring(0, 800),
           examDto.lang,
         )
       } catch (e: any) {
